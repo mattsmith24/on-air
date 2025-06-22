@@ -1,5 +1,6 @@
 This project is a simple solution to control an "On Air" sign using a Raspberry
-Pi Pico W GPIO pin.
+Pi Pico W GPIO pin. The use case is where you want to notify people around you
+that you are recording video or in an online meeting.
 
 It is designed for a Linux PC or laptop where the Webcam uses /dev/video0. A
 raspberry pi pico W or similar is used to host an API connected to a GPIO pin
@@ -20,7 +21,7 @@ Example POST request body to turn the GPIO pin on:
 }
 ```
 
-## Installation On Linux Laptop / PC
+# Installation On Linux Laptop / PC
 
 Adjust the path to the on-air script in the service file. It assumes
 /opt/on-air.
@@ -63,6 +64,9 @@ an "On Air" status indicator using a GPIO pin.
 - JSON-based communication
 
 ## Setup
+
+It will help to read the online getting started guide first.
+https://projects.raspberrypi.org/en/projects/get-started-pico-w
 
 1. Flash MicroPython to your Raspberry Pi Pico W
    - Download the latest MicroPython firmware from
@@ -120,3 +124,31 @@ You can test the API using curl:
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"on_air":true}' http://<pico-ip-address>
 ```
+
+# Hardware
+
+A USB powered on-air sign like this one on Amazon
+https://www.amazon.com.au/NPW-Gifts-Retro-Light-Board/dp/B0BHL1S1TC. Any sign or
+lamp that is powered by a USB port will do.
+
+Some electronic bits:
+
+- Veroboard or breadboard big enough for the Rasberry Pi and the MOSFET. Mine is
+  25 x 16 holes and there was plenty of room.
+- Raspberry Pi Pico W
+- A MOSFET that will fully switch on at 3.3V such as IRLB8721. Don't use the
+  more common 5V ones that are used with Arduinos.
+- 10kOhm resistor
+- Tinned copper wire about 0.71mm diameter (just for hooking up the circuit)
+
+Tools
+
+- Wire strippers
+- Solder and resin
+- Soldering iron
+- Micro-USB cable with data suitable for programming the Pico W
+
+Refer to the diagram in on-air-circuit-diagram.svg and create a similar diagram using veroboard
+or breadboard.
+
+![On-Air Circuit Diagram](on-air-circuit-diagram.svg)
