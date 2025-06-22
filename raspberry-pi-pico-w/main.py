@@ -6,7 +6,8 @@ import time
 from secrets import WIFI_SSID, WIFI_PASSWORD
 
 
-# GPIO pin for the On Air indicator (using built-in LED for testing)
+# GPIO pin for the On Air indicator
+# ON_AIR_PIN = "LED" # Use the built-in LED for testing
 ON_AIR_PIN = 16  # GPIO16 pin
 on_air_status = False
 

@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=matts
-WorkingDirectory=/mnt/data/matts/on-air
-ExecStart=/mnt/data/matts/on-air/on-air
+WorkingDirectory=/opt/on-air
+ExecStart=/opt/on-air/on-air
 Restart=always
 RestartSec=5
 

@@ -1,47 +1,29 @@
 This project is a simple solution to control an "On Air" sign using a Raspberry
-Pi and a GPIO pin.
+Pi Pico W GPIO pin.
+
+It is designed for a Linux PC or laptop where the Webcam uses /dev/video0. A
+raspberry pi pico W or similar is used to host an API connected to a GPIO pin
+which controls the driver circuit for the sign.
 
 The on-air shell script is used to monitor the state of the /dev/video0 device
 using lsof. If the device is in use, then a call is made to a REST API on the
-rasberry pi to notify that the video device is active.
+raspberry pi to notify that the video device is active.
 
-The on-air-api.py is a Flask application that provides a REST API to control the
-GPIO pin. A simple POST request can control the state of the GPIO pin. The API
-also provides a GET request to retrieve the current state of the GPIO pin.
+The main script on the raspberry pi provides a REST API to control the GPIO pin.
+A simple POST request can control the state of the GPIO pin.
 
 Example POST request body to turn the GPIO pin on:
 
 ``` json
 {
-    "state": 1
+    "on_air": true
 }
 ```
 
-## Installation
+## Installation On Linux Laptop / PC
 
-### On Raspberry Pi
-
-1. Install required packages:
-```bash
-sudo apt-get update
-sudo apt-get install python3-pip python3-flask python3-rpi.gpio
-pip3 install flask
-```
-
-2. Copy the service files to systemd:
-```bash
-sudo cp on-air-api.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable on-air-api
-sudo systemctl start on-air-api
-```
-
-3. Verify the service is running:
-```bash
-sudo systemctl status on-air-api
-```
-
-### On Laptop
+Adjust the path to the on-air script in the service file. It assumes
+/opt/on-air.
 
 1. Copy the service files to systemd:
 ```bash
@@ -64,9 +46,77 @@ Edit the `API_HOST` variable in the `on-air` script to match your Raspberry Pi's
 
 Check service logs:
 ```bash
-# On Raspberry Pi
-journalctl -u on-air-api -f
-
 # On Laptop
 journalctl -u on-air -f
+```
+
+# Raspberry Pi Pico W On Air Controller
+
+This project implements a simple REST API on a Raspberry Pi Pico W that controls
+an "On Air" status indicator using a GPIO pin.
+
+## Features
+
+- WiFi connectivity
+- REST API endpoint for controlling On Air status
+- GPIO control for visual indicator
+- JSON-based communication
+
+## Setup
+
+1. Flash MicroPython to your Raspberry Pi Pico W
+   - Download the latest MicroPython firmware from
+     [micropython.org](https://micropython.org/download/RPI_PICO_W/)
+   - Hold the BOOTSEL button while connecting the Pico W to your computer
+   - Copy the firmware file to the Pico W
+
+2. Configure WiFi
+   - Create a file  `secrets.py` and add WiFi credentials:
+     ```python
+     WIFI_SSID = "YOUR_WIFI_SSID"
+     WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
+     ```
+
+3. Configure GPIO
+   - By default, the script uses the built-in LED for testing
+   - To use a different GPIO pin, change the `ON_AIR_PIN` variable to the
+     desired pin number
+
+4. Upload the code
+   - Copy `main.py` to your Pico W
+   - The device will automatically connect to WiFi and start the server
+
+## Usage
+
+Send a POST request to the Pico W's IP address (port 80) with a JSON body:
+
+```json
+{
+    "on_air": true
+}
+```
+
+or
+
+```json
+{
+    "on_air": false
+}
+```
+
+The server will respond with:
+
+```json
+{
+    "status": "success",
+    "on_air": true
+}
+```
+
+## Testing
+
+You can test the API using curl:
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"on_air":true}' http://<pico-ip-address>
 ```
