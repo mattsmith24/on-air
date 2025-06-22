@@ -151,4 +151,9 @@ Tools
 Refer to the diagram in on-air-circuit-diagram.svg and create a similar diagram using veroboard
 or breadboard.
 
+Cut the USB cable and use wire strippers to expose the cores. The USB cable that
+came with my sign had one red core for 5V and the black for ground. Solder the
+USB-A side to the +5V and GND rails of your circuit. On the micro-usb side for
+powering the light, connect to +5V and the Drain pin on the MOSFET.
+
 ![On-Air Circuit Diagram](on-air-circuit-diagram.svg)
