@@ -27,8 +27,9 @@ while true; do
     on_air=$(check_device)
     if [ "$on_air" != "$prev_on_air" ]; then
         echo "Device state changed to: $on_air"
-        control_sign $on_air  # Pass the return value to control the sign
-        prev_on_air=$on_air
+        if control_sign $on_air; then
+            prev_on_air=$on_air
+        fi
     fi
     sleep $INTERVAL
 done
