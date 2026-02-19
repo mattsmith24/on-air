@@ -2,13 +2,17 @@ This project is a simple solution to control an "On Air" sign using a Raspberry
 Pi Pico W GPIO pin. The use case is where you want to notify people around you
 that you are recording video or in an online meeting.
 
-It is designed for a Linux PC or laptop where the Webcam uses /dev/video0. A
-raspberry pi pico W or similar is used to host an API connected to a GPIO pin
-which controls the driver circuit for the sign.
+It is designed for a Linux or macOS PC/laptop and uses Raspberry Pi Pico W (or
+similar) to host an API connected to a GPIO pin which controls the driver
+circuit for the sign.
 
-The on-air shell script is used to monitor the state of the /dev/video0 device
-using lsof. If the device is in use, then a call is made to a REST API on the
-raspberry pi to notify that the video device is active.
+The `on-air` shell script monitors camera activity and calls a REST API on the
+Raspberry Pi when the camera state changes.
+- Linux: checks if `/dev/video0` (configurable via `VIDEO_DEVICE`) is in use.
+- macOS: checks Apple camera in-use clients via `ioreg`
+  (`AppleH16CamInUserClient` / `AppleH13CamInUserClient`) and matches
+  `IOUserClientCreator` with `cameracaptured`, then falls back to generic
+  `ioreg` in-use flags and legacy camera assistants.
 
 The main script on the raspberry pi provides a REST API to control the GPIO pin.
 A simple POST request can control the state of the GPIO pin.
@@ -39,9 +43,26 @@ sudo systemctl start on-air
 sudo systemctl status on-air
 ```
 
+# Installation On macOS
+
+Adjust the path in `on-air.plist` if your script is not in `/opt/on-air/on-air`.
+
+1. Copy the launch agent:
+```bash
+mkdir -p ~/Library/LaunchAgents
+cp on-air.plist ~/Library/LaunchAgents/com.onair.sign.plist
+launchctl load -w ~/Library/LaunchAgents/com.onair.sign.plist
+```
+
+2. Verify it is loaded:
+```bash
+launchctl list | grep com.onair.sign
+```
+
 ## Configuration
 
 Edit the `API_HOST` variable in the `on-air` script to match your Raspberry Pi's hostname or IP address.
+For Linux, you can also set `VIDEO_DEVICE` if your camera is not `/dev/video0`.
 
 ## Troubleshooting
 
@@ -49,6 +70,11 @@ Check service logs:
 ```bash
 # On Laptop
 journalctl -u on-air -f
+```
+
+```bash
+# On macOS
+tail -f /tmp/on-air.log /tmp/on-air.err
 ```
 
 # Raspberry Pi Pico W On Air Controller

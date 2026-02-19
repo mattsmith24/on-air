@@ -4,14 +4,40 @@
 INTERVAL=5 # seconds between checks
 API_HOST="192.168.1.31"  # Change this to your Raspberry Pi's hostname/IP
 API_PORT=80
+VIDEO_DEVICE="/dev/video0" # Linux video device path
 
 # Function to check if video device is in use
 check_device() {
-    if lsof /dev/video0 > /dev/null 2>&1; then
-        echo "true"
-    else
-        echo "false"
-    fi
+    case "$(uname -s)" in
+        Linux)
+            if lsof "$VIDEO_DEVICE" > /dev/null 2>&1; then
+                echo "true"
+            else
+                echo "false"
+            fi
+            ;;
+        Darwin)
+            # Apple Silicon camera in-use clients (reliable for active calls/apps).
+            if ioreg -r -n AppleH16CamInUserClient 2>/dev/null | grep -qE 'IOUserClientCreator.*cameracaptured'; then
+                echo "true"
+            elif ioreg -r -n AppleH13CamInUserClient 2>/dev/null | grep -qE 'IOUserClientCreator.*cameracaptured'; then
+                echo "true"
+            # Fallback for other macOS builds exposing generic in-use flags.
+            elif ioreg -r -l 2>/dev/null | grep -qE '("InUse" = (Yes|1|true)|"DeviceInUse" = (Yes|1|true)|"StreamRunning" = (Yes|1|true))'; then
+                echo "true"
+            # Legacy camera assistants.
+            elif pgrep -x "VDCAssistant" > /dev/null 2>&1 \
+                || pgrep -x "AppleCameraAssistant" > /dev/null 2>&1 \
+                || pgrep -x "CMIOExtensionProvider" > /dev/null 2>&1; then
+                echo "true"
+            else
+                echo "false"
+            fi
+            ;;
+        *)
+            echo "false"
+            ;;
+    esac
 }
 
 # Function to control the sign via API
